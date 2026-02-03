@@ -1,0 +1,18 @@
+# Visual Studio
+.vs/
+bin/
+obj/
+
+# ASP.NET
+appsettings.Development.json
+*.user
+*.suo
+
+# Node / React nếu có frontend
+node_modules/
+dist/
+build/
+
+# OS
+.DS_Store
+Thumbs.db

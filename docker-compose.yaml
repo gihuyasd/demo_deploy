@@ -1,0 +1,67 @@
+version: "3.9"
+
+services:
+  postgres:
+    image: postgres:16
+    container_name: pg-fooddb
+    restart: always
+    environment:
+      POSTGRES_DB: fooddb
+      POSTGRES_USER: postgres
+      POSTGRES_PASSWORD: 123456
+    ports:
+      - "5432:5432"
+    volumes:
+      - pgdata:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U postgres -d fooddb"]
+      interval: 5s
+      timeout: 5s
+      retries: 5
+    networks:
+      - food-network
+
+  backend:
+    build:
+      context: ./backend/backend 
+      dockerfile: Dockerfile
+    container_name: dotnet-backend
+    restart: always
+    environment:
+      - DB_HOST=postgres
+      - DB_PORT=5432
+      - DB_NAME=fooddb
+      - DB_USER=postgres
+      - DB_PASS=123456
+      - JWT_SECRET=H8jL+9pXzW2sN/5V4qG1mK6vR3uY7bE9oI0zX8cW5nA=
+      - FRONTEND_URL=http://localhost 
+    ports:
+      - "5180:8080"
+    depends_on:
+      postgres:
+        condition: service_healthy
+    volumes:
+      - ./aspnet-keys:/root/.aspnet/DataProtection-Keys
+    networks:
+      - food-network
+
+  frontend:
+    build:
+      context: ./frontend 
+      args:
+        - VITE_API_URL=http://localhost:5180/api 
+    container_name: react-frontend
+    restart: always
+    ports:
+      - "80:80"
+    depends_on:
+      - backend
+    networks:
+      - food-network
+
+networks:
+  food-network:
+    driver: bridge
+
+volumes:
+  pgdata:
