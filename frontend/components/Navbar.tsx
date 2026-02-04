@@ -1,55 +1,24 @@
 import React, { useState, useEffect } from 'react';
-import { Link, useNavigate, useLocation } from 'react-router-dom';
+import { Link, useNavigate } from 'react-router-dom';
 import { ShoppingBag, Utensils, LogOut, Menu, X, Pizza } from 'lucide-react';
-import axios from 'axios';
 
-const Navbar: React.FC = () => {
+interface NavbarProps {
+  cartCount: number;
+}
+
+const Navbar: React.FC<NavbarProps> = ({ cartCount }) => {
   const [isLoggedIn, setIsLoggedIn] = useState<boolean>(false);
   const [isMenuOpen, setIsMenuOpen] = useState<boolean>(false);
-  const [cartItemCount, setCartItemCount] = useState<number>(0);
   const navigate = useNavigate();
-  const location = useLocation();
-
-  const API_URL = import.meta.env.VITE_API_URL;
-
-  // Hàm lấy số lượng món từ API chuyên dụng
-  const fetchCartCount = async () => {
-    const token = localStorage.getItem('access_token');
-    if (!token) {
-      setCartItemCount(0);
-      return;
-    }
-
-    try {
-      // Gọi đúng endpoint /Cart/item-count
-      const response = await axios.get(`${API_URL}/Cart/item-count`, {
-        headers: { Authorization: `Bearer ${token}` }
-      });
-      
-      setCartItemCount(response.data.totalItems || 0);
-    } catch (err) {
-      console.error("Lỗi lấy item-count:", err);
-    }
-  };
 
   useEffect(() => {
     const token = localStorage.getItem('access_token');
     setIsLoggedIn(!!token);
-    
-    if (token) {
-      fetchCartCount();
-    }
-    const handleCartUpdate = () => fetchCartCount();
-    window.addEventListener('cartUpdated', handleCartUpdate);
-    return () => {
-      window.removeEventListener('cartUpdated', handleCartUpdate);
-    };
-  }, [location.pathname]); // Cập nhật lại số lượng mỗi khi chuyển trang
+  }, []);
 
   const handleLogout = () => {
     localStorage.removeItem('access_token');
     setIsLoggedIn(false);
-    setCartItemCount(0);
     navigate('/');
   };
 
@@ -77,9 +46,9 @@ const Navbar: React.FC = () => {
               <>
                 <Link to="/cart" className="relative font-bold text-gray-700 hover:text-red-500 transition-colors flex items-center gap-1">
                   <ShoppingBag size={18} /> Giỏ hàng
-                  {cartItemCount > 0 && (
+                  {cartCount > 0 && (
                     <span className="absolute -top-2 -right-3 bg-red-600 text-white text-[10px] font-bold px-1.5 py-0.5 rounded-full border-2 border-white animate-pulse">
-                      {cartItemCount}
+                      {cartCount}
                     </span>
                   )}
                 </Link>
@@ -103,16 +72,15 @@ const Navbar: React.FC = () => {
           </div>
         </div>
       </div>
-
-      {/* Mobile Menu Content */}
+      
       {isMenuOpen && (
-        <div className="md:hidden bg-white border-t border-gray-100 p-4 space-y-4 shadow-xl">
+        <div className="md:hidden bg-white border-t border-gray-100 p-4 space-y-4">
           <Link to="/" className="block font-bold text-gray-700 p-2">Trang chủ</Link>
           {isLoggedIn ? (
             <>
               <Link to="/cart" className="flex justify-between items-center font-bold text-gray-700 p-2">
                 Giỏ hàng
-                <span className="bg-red-500 text-white px-2 py-0.5 rounded-full text-xs">{cartItemCount}</span>
+                <span className="bg-red-500 text-white px-2 py-0.5 rounded-full text-xs">{cartCount}</span>
               </Link>
               <button onClick={handleLogout} className="w-full text-left font-bold text-red-600 p-2">Đăng xuất</button>
             </>

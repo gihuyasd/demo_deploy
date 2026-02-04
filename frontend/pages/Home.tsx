@@ -1,12 +1,37 @@
-import React from 'react';
+import React, { useState, useEffect, useCallback } from 'react';
 import Navbar from '../components/Navbar';
 import FoodMenu from '../components/FoodMenu';
 import { Utensils } from 'lucide-react';
+import axios from 'axios';
 
 const Home: React.FC = () => {
+  const [cartItemCount, setCartItemCount] = useState<number>(0);
+  const API_URL = import.meta.env.VITE_API_URL;
+
+  const fetchCartCount = useCallback(async () => {
+    const token = localStorage.getItem('access_token');
+    if (!token) {
+      setCartItemCount(0);
+      return;
+    }
+
+    try {
+      const response = await axios.get(`${API_URL}/Cart/item-count`, {
+        headers: { Authorization: `Bearer ${token}` }
+      });
+      setCartItemCount(response.data.totalItems || 0);
+    } catch (err) {
+      console.error("Lỗi lấy item-count:", err);
+    }
+  }, [API_URL]);
+
+  useEffect(() => {
+    fetchCartCount();
+  }, [fetchCartCount]);
+
   return (
     <div className="min-h-screen bg-white flex flex-col">
-      <Navbar />
+      <Navbar cartCount={cartItemCount} />
 
       <main className="grow">
         <section className="relative bg-orange-500 py-16 lg:py-24 overflow-hidden">
@@ -15,16 +40,12 @@ const Home: React.FC = () => {
           <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 relative z-10">
             <div className="text-center lg:text-left lg:max-w-2xl">
               <h1 className="text-4xl lg:text-6xl font-black text-white leading-tight uppercase tracking-tighter">
-                 <span className="text-yellow-300"></span> <br />
-                 <span className="text-yellow-300"></span>
+                 Fast Food <br />
+                 <span className="text-yellow-300">Giao Tận Nơi</span>
               </h1>
               <p className="mt-6 text-orange-100 text-lg font-medium max-w-lg">
-                 <span className="text-white font-bold text-xl"></span>
+                 Thưởng thức những món ăn ngon nhất chỉ với vài cú click.
               </p>
-              
-              <div className="mt-10 flex flex-col sm:flex-row gap-4 justify-center lg:justify-start">
-               
-              </div>
             </div>
           </div>
 
@@ -34,15 +55,16 @@ const Home: React.FC = () => {
                 <img 
                   src="https://cdn-icons-png.flaticon.com/512/3075/3075977.png" 
                   alt="Delicious Food"
-                  className="relative z-10 animate-bounce-slow"
-                  style={{ animation: 'bounce-slow 3s ease-in-out infinite' }}
+                  className="relative z-10"
+                  style={{ animation: 'bounce-slow 4s ease-in-out infinite' }}
                 />
              </div>
           </div>
         </section>
 
         <div id="menu-section">
-          <FoodMenu />
+          {/* Truyền hàm fetchCartCount xuống để FoodMenu gọi khi thêm thành công */}
+          <FoodMenu onAddToCartSuccess={fetchCartCount} />
         </div>
       </main>
 
@@ -60,9 +82,6 @@ const Home: React.FC = () => {
         @keyframes bounce-slow {
           0%, 100% { transform: translateY(0); }
           50% { transform: translateY(-20px); }
-        }
-        .animate-bounce-slow {
-          animation: bounce-slow 4s ease-in-out infinite;
         }
       `}</style>
     </div>
