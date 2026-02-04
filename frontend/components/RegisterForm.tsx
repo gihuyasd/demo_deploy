@@ -78,6 +78,25 @@ const RegisterForm: React.FC = () => {
     } catch (err) {
       const axiosError = err as AxiosError<ApiErrorResponse>;
       let errorMessage = 'Có lỗi xảy ra khi đăng ký, vui lòng thử lại.';
+      if(axiosError.response) {
+        const data = axiosError.response.data;
+        if (typeof data === 'string') {
+          errorMessage = data;
+        } 
+        else if (data.message) {
+          errorMessage = data.message;
+        }
+
+        else if ((data as any).errors) {
+          const validationErrors = (data as any).errors;
+          const firstKey = Object.keys(validationErrors)[0];
+          errorMessage = validationErrors[firstKey][0];
+        }
+        else if (data.detail) {
+          errorMessage = typeof data.detail === 'string' ? data.detail : 'Dữ liệu không hợp lệ';
+        }
+      }
+
       
       if (axiosError.response?.data?.message) {
         errorMessage = axiosError.response.data.message;
@@ -184,6 +203,7 @@ const RegisterForm: React.FC = () => {
               required
               className="w-full pl-10 pr-10 py-3 border-2 border-gray-100 rounded-xl focus:ring-2 focus:ring-orange-500 focus:border-orange-500 outline-none"
               placeholder="******"
+              minLength={6}
             />
             <button type="button" onClick={() => setShowPassword(!showPassword)} className="absolute right-3 top-3 text-gray-400">
               {showPassword ? <EyeOff size={18} /> : <Eye size={18} />}
