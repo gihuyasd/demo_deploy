@@ -4,8 +4,6 @@ using System.ComponentModel.DataAnnotations;
 namespace backend.Models.Entities
 {
     [Index(nameof(Username), IsUnique = true)]
-    [Index(nameof(Email), IsUnique = true)]
-    [Index(nameof(Phone), IsUnique = true)]
     public class Customer
     {
         [Key]
