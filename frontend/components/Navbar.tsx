@@ -39,6 +39,11 @@ const Navbar: React.FC = () => {
     if (token) {
       fetchCartCount();
     }
+    const handleCartUpdate = () => fetchCartCount();
+    window.addEventListener('cartUpdated', handleCartUpdate);
+    return () => {
+      window.removeEventListener('cartUpdated', handleCartUpdate);
+    };
   }, [location.pathname]); // Cập nhật lại số lượng mỗi khi chuyển trang
 
   const handleLogout = () => {

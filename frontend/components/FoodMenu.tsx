@@ -54,6 +54,7 @@ const FoodMenu: React.FC = () => {
       );
 
       alert("Đã thêm món vào giỏ hàng!");
+      window.dispatchEvent(new Event('cartUpdated'));
     } catch (err) {
       console.error("Lỗi thêm giỏ hàng:", err);
       alert("Không thể thêm vào giỏ hàng. Thử lại sau!");
