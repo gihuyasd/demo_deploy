@@ -18,7 +18,6 @@ const Cart: React.FC = () => {
   const [loading, setLoading] = useState<boolean>(true);
   const [checkoutLoading, setCheckoutLoading] = useState<boolean>(false);
   
-  // State cho thông tin đặt hàng
   const [address, setAddress] = useState<string>('');
   const [note, setNote] = useState<string>('');
 
@@ -74,12 +73,15 @@ const Cart: React.FC = () => {
     }
   };
 
-  // Tính toán tiền
+  // --- TÍNH TOÁN DỮ LIỆU ---
+  // Tính tổng số lượng món (để hiển thị badge trên Navbar)
+  const cartCount = items.reduce((acc, item) => acc + item.quantity, 0);
+  
+  // Tính tiền
   const subtotal = items.reduce((acc, item) => acc + item.price * item.quantity, 0);
   const shippingFee = items.length > 0 ? 15000 : 0;
   const total = subtotal + shippingFee;
 
-  // Xử lý Đặt món
   const handleCheckout = async () => {
     if (!address.trim()) {
       alert("Vui lòng nhập địa chỉ giao hàng!");
@@ -100,7 +102,7 @@ const Cart: React.FC = () => {
       });
       
       alert("Đặt món thành công! Đơn hàng của bạn đang được xử lý.");
-      navigate('/'); // Chuyển về trang chủ sau khi đặt xong
+      navigate('/'); 
     } catch (err) {
       console.error("Lỗi đặt hàng:", err);
       alert("Có lỗi xảy ra khi đặt hàng. Vui lòng thử lại!");
@@ -119,7 +121,9 @@ const Cart: React.FC = () => {
 
   return (
     <div className="min-h-screen bg-[#FDFDFD] flex flex-col">
-      <Navbar />
+      {/* QUAN TRỌNG: Truyền cartCount vào đây để hết lỗi build */}
+      <Navbar cartCount={cartCount} />
+      
       <main className="max-w-7xl mx-auto px-4 py-8 w-full grow">
         <Link to="/" className="inline-flex items-center gap-2 text-gray-500 hover:text-orange-600 font-bold mb-8 transition-all group">
           <div className="bg-white p-2 rounded-full shadow-sm group-hover:shadow-md transition-shadow">
@@ -141,7 +145,6 @@ const Cart: React.FC = () => {
                 onRemove={handleRemove} 
               />
 
-              {/* Thông tin giao hàng & Ghi chú */}
               <div className="grid grid-cols-1 md:grid-cols-2 gap-6 mt-8">
                 <div className="bg-white p-6 rounded-3xl border border-gray-100 shadow-sm">
                   <label className="flex items-center gap-2 text-sm font-bold text-gray-700 mb-3 uppercase tracking-wider">
